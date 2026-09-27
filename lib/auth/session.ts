@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Profile } from "@/lib/auth/types";
 
 export interface AuthContext {
@@ -28,7 +29,8 @@ export async function getAuthContext(): Promise<AuthResult> {
 		};
 	}
 
-	const { data: profile, error: profileError } = await supabase
+	const admin = createAdminClient();
+	const { data: profile, error: profileError } = await admin
 		.from("profiles")
 		.select("id, full_name, email, role, created_at, updated_at")
 		.eq("id", user.id)

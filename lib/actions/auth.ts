@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { loginSchema, registerSchema } from "@/lib/validations/auth.schema";
 import { DASHBOARD_PATH } from "@/lib/auth/page-guards";
 
@@ -25,17 +26,18 @@ export async function loginAction(_prevState: AuthFormState, formData: FormData)
 	const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
 
 	if (error || !data.user) {
-		return { error: "Invalid email or password." };
+		return { error: error?.message ?? "Invalid email or password." };
 	}
 
-	const { data: profile, error: profileError } = await supabase
+	const admin = createAdminClient();
+	const { data: profile, error: profileError } = await admin
 		.from("profiles")
 		.select("role")
 		.eq("id", data.user.id)
 		.single();
 
 	if (profileError || !profile) {
-		return { error: "Signed in, but couldn't load your account profile. Please try again." };
+		return { error: profileError?.message ?? "Signed in, but couldn't load your account profile. Please try again." };
 	}
 
 	redirect(DASHBOARD_PATH[profile.role as keyof typeof DASHBOARD_PATH]);

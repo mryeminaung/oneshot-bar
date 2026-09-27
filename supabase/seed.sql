@@ -1,7 +1,15 @@
--- Test data for local/dev use. Run in the Supabase SQL editor after
--- 0001_init_auth.sql and 0002_tables_reservations.sql have both run.
+-- ─────────────────────────────────────────────────────────────────────────────
+-- OneShotBar — seed data (tables + reservations only)
+-- Run AFTER schema.sql in the Supabase SQL editor.
+--
+-- To create test auth accounts run:  node scripts/seed-users.mjs
+--   customer@gmail.com / password123  – role: customer
+--   staff@gmail.com    / password123  – role: staff
+--   manager@gmail.com  / password123  – role: manager
+-- ─────────────────────────────────────────────────────────────────────────────
 
--- 6 tables, matching the spec's example numbers/capacities.
+-- ── Bar tables ────────────────────────────────────────────────────────────────
+
 insert into public.tables (table_number, capacity, status) values
 	(1, 2, 'available'),
 	(2, 4, 'available'),
@@ -11,14 +19,14 @@ insert into public.tables (table_number, capacity, status) values
 	(6, 2, 'available')
 on conflict (table_number) do nothing;
 
--- Sample reservations for the test customer registered during manual testing
--- (oneshotbar.test.customer1@gmail.com). Skips quietly if that account
--- doesn't exist yet — register it first, or edit the email below.
+-- ── Sample reservations for customer@gmail.com ────────────────────────────────
+-- Skips quietly if that account doesn't exist yet — run seed-users.mjs first.
+
 do $$
 declare
 	v_user_id uuid;
 begin
-	select id into v_user_id from public.profiles where email = 'oneshotbar.test.customer1@gmail.com';
+	select id into v_user_id from public.profiles where email = 'customer@gmail.com';
 
 	if v_user_id is not null then
 		insert into public.reservations (user_id, table_id, reservation_date, reservation_time, guest_count, status)
